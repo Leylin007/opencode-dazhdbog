@@ -1,37 +1,37 @@
-# Даждьбог (Dazhdbog) — OpenCode plugin
+# Dazhdbog (Даждьбог) — OpenCode plugin
 
 **[English](README.md) | [Русский](README.ru.md)**
 
 ---
 
-![Даждьбог — панель управления для OpenCode](img/dazhdbog-shot-1.png)
+![Dazhdbog — control panel for OpenCode](img/dazhdbog-shot-1.png)
 
-## Что это
+## What is it
 
-**Даждьбог** — TUI-плагин для **OpenCode v2**, который даёт полный контроль над рабочим пространством из одной боковой панели: скиллы, инструменты, MCP-серверы и плагины — с текущим состоянием, тумблерами в один клик, **наборами** и **пресетами** для мгновенного применения целых конфигураций.
+**Dazhdbog** is a TUI plugin for **OpenCode v2** that gives you full control over your workspace from a single sidebar panel: skills, tools, MCP servers and plugins — with current state, one-click toggles, **sets** and **presets** for applying whole configurations instantly.
 
-### Возможности
+### Features
 
-- **Боковая панель** — всё, что может загрузить OpenCode, в одном месте:
-  - **Скиллы** — все скиллы текущего проекта и глобальной конфигурации: включено/выключено, состояние загрузки (загруженные — зелёным наверху), оценка токенов;
-  - **Инструменты** — каждый инструмент (write, edit, shell, subagent, MCP-инструменты и т.д.): правила включения/выключения, счётчики использований, оценка токенов;
-  - **MCP-серверы** — каталог серверов: статус (подключён / нужна авторизация / выключен), включение/выключение, группировка по классам;
-  - **Плагины** — загруженные плагины с тумблерами и статусом.
-- **Тумблеры в один клик** — включение/выключение любого элемента без ручной правки конфигов: плагин сам пишет нужные правила/настройки.
-- **Счётчики использований** — статистика по скиллам и инструментам: видно, что реально ест контекст.
-- **Наборы (sets)** — группируйте скиллы в именованные наборы и применяйте их мгновенно; состояние сохраняется между перезапусками.
-- **Пресеты** — сохраняйте полную конфигурацию (скиллы + инструменты + плагины + MCP) и применяйте её одной кнопкой.
-- **Статусные индикаторы** — кружок у элемента показывает его состояние:
-  - 🟢 зелёный — активно / подключено (например, активный пресет без изменений);
-  - 🟡 жёлтый — предупреждение (пресет изменён, MCP требует авторизации, таймаут);
-  - 🔴 красный — ошибка (MCP-сервер не подключился, применение не удалось);
-  - ⚪ серый — выключено / неактивно.
-- **Русские описания** — встроенный словарь переводит названия скиллов/инструментов/серверов/плагинов.
-- **Работает локально** — всё состояние хранится в `.opencode/.skills-tui`, без облаков и телеметрии.
+- **Sidebar panel** — everything OpenCode can load in one place:
+  - **Skills** — all skills of the current project and global config: enabled/disabled state, loading state (loaded skills are highlighted green on top), estimated token consumption;
+  - **Tools** — every tool (write, edit, shell, subagent, MCP tools, …): enable/disable rules, usage counters, token estimates;
+  - **MCP servers** — server catalog: status (connected / auth required / disabled), enable/disable per server, grouping by class;
+  - **Plugins** — loaded plugins with toggles and status.
+- **One-click toggles** — enable/disable any skill, tool, MCP server or plugin without editing config files by hand; the plugin writes the proper rules/settings for you.
+- **Usage counters** — per-skill and per-tool statistics show what actually consumes context.
+- **Sets** — group skills into named sets and apply them instantly; state is persisted across restarts.
+- **Presets** — save a full configuration (skills + tools + plugins + MCP) and apply it with a single click.
+- **Status indicators** — a dot next to an item shows its state:
+  - 🟢 green — active / connected (e.g. active preset without changes);
+  - 🟡 yellow — warning (preset modified, MCP requires auth, timeout);
+  - 🔴 red — error (MCP server failed to connect, applying failed);
+  - ⚪ gray — disabled / inactive.
+- **Russian descriptions** — built-in dictionary translates skill/tool/server/plugin names into Russian.
+- **Works locally** — all state lives in `.opencode/.skills-tui`, no cloud, no telemetry.
 
-## Установка
+## Installation
 
-**Агентом (автоматически, через git):**
+**By an agent (automated, via git):**
 
 ```bash
 git clone --depth 1 https://github.com/Leylin007/opencode-dazhdbog.git /tmp/dazhdbog
@@ -40,7 +40,7 @@ cp -r /tmp/dazhdbog/{index.ts,tui.tsx,build.ts,package.json,dist} ~/.config/open
 opencode service restart
 ```
 
-Windows-агент (PowerShell):
+Windows agent (PowerShell):
 
 ```powershell
 $src = "$env:TEMP\dazhdbog"
@@ -52,9 +52,9 @@ Copy-Item "$src\dist" $dst -Recurse -Force
 opencode service restart
 ```
 
-> Примечание для агентов: после перезапуска плагин обнаруживается автоматически из `~/.config/opencode/plugins/`. **Не регистрируйте его в `cli.json`** — запись имени там заставит OpenCode пытаться установить его как npm-пакет.
+> Note for agents: after restart the plugin is discovered automatically from `~/.config/opencode/plugins/`. **Do not register it in `cli.json`** — adding the name there makes OpenCode try to install it as an npm package.
 
-**Вручную:**
+**Manually:**
 
 ```bash
 git clone --depth 1 https://github.com/Leylin007/opencode-dazhdbog.git
@@ -62,22 +62,22 @@ cp -r opencode-dazhdbog ~/.config/opencode/plugins/dazhdbog
 opencode service restart
 ```
 
-После перезапуска откройте сайдбар — панель Даждьбога появится автоматически.
+After the restart, open the sidebar — the Dazhdbog panel appears automatically.
 
-## Референсные проекты (благодарности!)
+## Reference projects (thanks!)
 
-Плагин создан с опорой на три отличных open-source-плагина для OpenCode — большое спасибо их авторам:
+This plugin was built with heavy inspiration from three great open-source OpenCode plugins — many thanks to their authors:
 
-- **[MCPClassify](https://github.com/StandarterDF/MCPClassify_OCV2)** — дерево MCP в сайдбаре по классам (MCP → Класс → серверы) с тумблерами по клику вместо плоского списка; свёртка запоминается, штатная секция глушится директивой в `cli.json`.
-- **[opencode-skills-tui](https://github.com/aihaipeng/opencode-skills-tui)** — TUI-плагин: секция Skills в правом сайдбаре, загруженные скиллы зелёным наверху, счётчики использований через `/skills-stats`, чтение `SKILL.md` по правому клику.
-- **[skill-switch](https://github.com/hatappo/skill-switch)** — TUI-переключатель скиллов между агентами: тумблеры через `permission.skill` в `opencode.json` (deny/allow без переименования папок), установка и удаление из одной таблицы.
+- **[MCPClassify](https://github.com/StandarterDF/MCPClassify_OCV2)** — MCP tree in the sidebar grouped by classes (MCP → Class → servers) with click toggles instead of a flat list; collapse state is remembered, the default section is suppressed via a directive in `cli.json`.
+- **[opencode-skills-tui](https://github.com/aihaipeng/opencode-skills-tui)** — TUI plugin: Skills section in the right sidebar, loaded skills highlighted green on top, usage counters via `/skills-stats`, reading `SKILL.md` on right-click.
+- **[skill-switch](https://github.com/hatappo/skill-switch)** — TUI skill switcher between agents: toggles via `permission.skill` in `opencode.json` (deny/allow without renaming folders), install/uninstall from one table.
 
-## Другие проекты автора
+## Author's other projects
 
-- **[Велес](https://velesbrowser.com)** — кинобраузер для Windows: своя картинка, микшер звука и запись роликов.
-- **[Перун](https://svarog.tech/#/product/perun-guard)** — Android-страж камеры и микрофона, полностью офлайн.
-- **[Стрибог](https://svarog.tech/#/product/stribog)** — экранный рекордер для Windows, 2K по подписке.
+- **[Veles](https://velesbrowser.com)** — cinema browser for Windows: your own picture, sound mixer and video recording.
+- **[Perun](https://svarog.tech/#/product/perun-guard)** — Android guard: camera & microphone activity monitor, fully offline.
+- **[Stribog](https://svarog.tech/#/product/stribog)** — screen recorder for Windows, 2K with a subscription.
 
-## Лицензия
+## License
 
-MIT — см. [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE).
