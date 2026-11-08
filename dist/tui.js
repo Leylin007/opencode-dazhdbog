@@ -333,10 +333,7 @@ function SkillsManagerPanel(props) {
     setOpenMap({
       ...COLLAPSED
     });
-    for (const skill of props.tree().unassigned.skills) {
-      if (skill.enabled !== next)
-        props.onToggleSkill(skill);
-    }
+    props.onToggleUnassigned(props.tree().unassigned.skills);
   };
   const loadedCount = createMemo(() => {
     const loaded = props.loadedIDs();
