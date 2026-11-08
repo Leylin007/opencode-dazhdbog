@@ -6539,9 +6539,8 @@ var tui_default = definePlugin({
       const pcustom = readItemGroupsCached("plugins", projectRoot);
       const passign = new Map;
       for (const [gname, cfg] of Object.entries(pcustom)) {
-        if (cfg.enabled)
-          for (const id of cfg.items)
-            passign.set(id, gname);
+        for (const id of cfg.items)
+          passign.set(id, gname);
       }
       const flat = [...seen.values()].sort((a, b) => a.system === b.system ? a.label.localeCompare(b.label) : a.system ? -1 : 1).map((plugin) => {
         const g = passign.get(plugin.id);
@@ -6752,7 +6751,13 @@ var tui_default = definePlugin({
         groupOrder.push(mcpDefaultClass);
       const buckets = new Map;
       for (const server of servers) {
-        const label = serverToGroup.get(server.name) ?? mcpDefaultClass;
+        let label = serverToGroup.get(server.name) ?? mcpDefaultClass;
+        for (const [gname, cfg] of Object.entries(custom)) {
+          if (cfg.servers.includes(server.name)) {
+            label = gname;
+            break;
+          }
+        }
         const list = buckets.get(label);
         if (list)
           list.push(server);
