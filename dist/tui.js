@@ -7521,6 +7521,7 @@ var tui_default = definePlugin({
               themeMode: () => ctx.themeMode,
               onToggleNode: toggleNode,
               onToggleSkill: (skill) => void toggleSkill(skill),
+              onToggleUnassigned: (skills) => void toggleUnassignedAll(skills),
               onSkillMenu: openSkillMenu,
               onSkillMention: (skill) => insertSkill(skill, location()),
               onToggleSet: (set) => void toggleSet(set),
