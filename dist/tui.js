@@ -6843,7 +6843,6 @@ var tui_default = definePlugin({
     };
     const toggleMcpGroup = async (group) => {
       const label = group.label;
-      let nextOn = true;
       await mutateMcpGroups((groups) => {
         if (!groups[label]) {
           groups[label] = {
@@ -6851,12 +6850,27 @@ var tui_default = definePlugin({
             enabled: true
           };
         }
-        groups[label].enabled = !groups[label].enabled;
-        nextOn = groups[label].enabled;
+        const cfg = groups[label];
+        if (cfg.enabled) {
+          cfg.saved = {};
+          for (const s of group.servers) {
+            cfg.saved[s.name] = s.status !== "disabled";
+          }
+          cfg.enabled = false;
+          for (const s of group.servers) {
+            setMcpServerEnabledAll(s.name, false);
+          }
+        } else {
+          const saved = cfg.saved ?? {};
+          for (const s of group.servers) {
+            const wanted = saved[s.name];
+            if (wanted !== undefined)
+              setMcpServerEnabledAll(s.name, wanted);
+          }
+          delete cfg.saved;
+          cfg.enabled = true;
+        }
       });
-      for (const server of group.servers) {
-        setMcpServerEnabledAll(server.name, nextOn);
-      }
       bumpTree();
     };
     const renameMcpGroup = async (group) => {
