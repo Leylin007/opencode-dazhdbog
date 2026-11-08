@@ -4477,6 +4477,31 @@ async function setPluginEnabled(id, enabled) {
     return;
   await writeTextFileAtomic(path, edited);
 }
+async function setPluginDirectiveOnly(id, enabled) {
+  const path = cliJsonPath();
+  const original = readTextFile(path);
+  const text = original === undefined || original.trim().length === 0 ? `{}
+` : original;
+  const errors = [];
+  const value = parse2(text, errors, { allowTrailingComma: true, disallowComments: false });
+  if (errors.length > 0)
+    throw new Error(`${path}: invalid JSONC; refusing to edit`);
+  const formattingOptions = detectFormatting3(text);
+  const plugins = value?.plugins;
+  const entries = Array.isArray(plugins) ? plugins : [];
+  let edited = text;
+  const minusIndex = entries.findIndex((entry) => entry === `-${id}`);
+  if (enabled) {
+    if (minusIndex >= 0)
+      edited = applyEdits(edited, modify(edited, ["plugins", minusIndex], undefined, { formattingOptions }));
+  } else {
+    if (minusIndex < 0)
+      edited = applyEdits(edited, modify(edited, ["plugins", entries.length], `-${id}`, { formattingOptions }));
+  }
+  if (edited === text)
+    return;
+  await writeTextFileAtomic(path, edited);
+}
 
 // src/mcp-classes.ts
 var DEFAULT_CLASS = "Other";
@@ -5273,6 +5298,7 @@ var tui_default = definePlugin({
       });
     };
     const toggleItemGroup = async (kind, label) => {
+      let nextOn = true;
       await mutateItemGroups(kind, (groups) => {
         if (!groups[label]) {
           let items = [];
@@ -5291,7 +5317,22 @@ var tui_default = definePlugin({
           };
         }
         groups[label].enabled = !groups[label].enabled;
+        nextOn = groups[label].enabled;
       });
+      const root = currentLocation().directory;
+      const members = readItemGroupsCached(kind, root)[label]?.items ?? [];
+      try {
+        if (kind === "tools") {
+          for (const name of members)
+            await writeToolRule(root, name, nextOn);
+        } else {
+          for (const id of members)
+            await setPluginDirectiveOnly(id, nextOn);
+        }
+        bumpTree();
+      } catch (error) {
+        reportError(`\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0438\u0442\u044C \u0433\u0440\u0443\u043F\u043F\u0443 \xAB${label}\xBB: ${errorMessage(error)}`);
+      }
     };
     const renameItemGroup = async (kind, label) => {
       let name;
