@@ -6284,55 +6284,17 @@ var tui_default = definePlugin({
         reportError(`\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0438\u0442\u044C \xAB${skill.name ?? skill.id}\xBB: ${errorMessage(error)}`);
       }
     };
-    const unassignedStatePath = (projectRoot) => join9(projectRoot, ".opencode", ".skills-tui", "unassigned-state.json");
     const toggleUnassignedAll = async (skills) => {
       if (disposed)
         return;
       const root = currentLocation().directory;
-      const file = unassignedStatePath(root);
-      let prev = {};
+      const anyOn = skills.some((skill) => skill.enabled);
+      const effect = anyOn ? "deny" : "allow";
       try {
-        const raw = readTextFile(file);
-        if (raw)
-          prev = JSON.parse(raw);
-      } catch {}
-      const turnOff = prev.enabled !== false;
-      try {
-        if (turnOff) {
-          const saved = {};
-          const jobs = [];
-          for (const skill of skills) {
-            saved[skill.id] = skill.enabled;
-            if (skill.enabled) {
-              const target = targetForSkill(skill.path, root);
-              jobs.push(writeSkillPermissions(root, target, {
-                [skill.id]: "deny"
-              }));
-            }
-          }
-          await Promise.all(jobs);
-          await writeTextFileAtomic(file, `${JSON.stringify({
-            enabled: false,
-            saved
-          }, null, 2)}
-`);
-        } else {
-          const jobs = [];
-          for (const skill of skills) {
-            const wanted = prev.saved?.[skill.id];
-            if (wanted === undefined)
-              continue;
-            if (wanted !== skill.enabled) {
-              const target = targetForSkill(skill.path, root);
-              jobs.push(writeSkillPermissions(root, target, {
-                [skill.id]: wanted ? "allow" : "deny"
-              }));
-            }
-          }
-          await Promise.all(jobs);
-          await writeTextFileAtomic(file, `${JSON.stringify({}, null, 2)}
-`);
-        }
+        const jobs = skills.map((skill) => writeSkillPermissions(root, targetForSkill(skill.path, root), {
+          [skill.id]: effect
+        }));
+        await Promise.all(jobs);
         setOpError(undefined);
         bumpTree();
       } catch (error) {
