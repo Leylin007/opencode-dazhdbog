@@ -6808,6 +6808,7 @@ var tui_default = definePlugin({
     };
     const toggleMcpGroup = async (group) => {
       const label = group.label;
+      let nextOn = true;
       await mutateMcpGroups((groups) => {
         if (!groups[label]) {
           groups[label] = {
@@ -6816,7 +6817,12 @@ var tui_default = definePlugin({
           };
         }
         groups[label].enabled = !groups[label].enabled;
+        nextOn = groups[label].enabled;
       });
+      for (const server of group.servers) {
+        setMcpServerEnabledAll(server.name, nextOn);
+      }
+      bumpTree();
     };
     const renameMcpGroup = async (group) => {
       let name;
