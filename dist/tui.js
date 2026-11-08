@@ -328,10 +328,15 @@ function SkillsManagerPanel(props) {
     if (now - prev < 120)
       return;
     lastToggle.set("unassigned-enabled", now);
-    COLLAPSED["unassigned-enabled"] = !(COLLAPSED["unassigned-enabled"] !== false);
+    const next = !(COLLAPSED["unassigned-enabled"] !== false);
+    COLLAPSED["unassigned-enabled"] = next;
     setOpenMap({
       ...COLLAPSED
     });
+    for (const skill of props.tree().unassigned.skills) {
+      if (skill.enabled !== next)
+        props.onToggleSkill(skill);
+    }
   };
   const loadedCount = createMemo(() => {
     const loaded = props.loadedIDs();
@@ -1023,7 +1028,7 @@ function SkillsManagerPanel(props) {
               _$insert(_el$56, () => `(${props.tree().unassigned.skills.filter((s) => s.enabled).length}/${props.tree().unassigned.skills.length})`);
               _$insert(_el$48, _$createComponent(Show, {
                 get when() {
-                  return _$memo(() => !!isOpen("unassigned"))() && unassignedEnabled();
+                  return isOpen("unassigned");
                 },
                 get children() {
                   return _$createComponent(For, {
