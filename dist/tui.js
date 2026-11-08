@@ -6913,6 +6913,7 @@ var tui_default = definePlugin({
         }
       });
       bumpTree();
+      spawnReload();
     };
     const renameMcpGroup = async (group) => {
       let name;
@@ -7004,10 +7005,20 @@ var tui_default = definePlugin({
         }
       });
     };
+    const spawnReload = () => {
+      try {
+        spawn2("opencode", ["reload"], {
+          windowsHide: true,
+          detached: true,
+          stdio: "ignore"
+        }).unref();
+      } catch {}
+    };
     const togglePersistentServer = (server) => {
       const next = server.status !== "disabled";
       const changed = setMcpServerEnabledAll(server.name, next);
       bumpTree();
+      spawnReload();
       ctx.ui.toast.show({
         title: "MCP",
         message: changed > 0 ? `\xAB${server.name}\xBB ${next ? "\u0432\u044B\u043A\u043B\u044E\u0447\u0435\u043D \u043D\u0430\u0432\u0441\u0435\u0433\u0434\u0430" : "\u0432\u043A\u043B\u044E\u0447\u0451\u043D \u043D\u0430\u0432\u0441\u0435\u0433\u0434\u0430"} \u2014 \u043F\u043E\u0441\u043B\u0435 \u043F\u0435\u0440\u0435\u0437\u0430\u043F\u0443\u0441\u043A\u0430` : "\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u0438\u0437\u043C\u0435\u043D\u0438\u0442\u044C \u043A\u043E\u043D\u0444\u0438\u0433",
