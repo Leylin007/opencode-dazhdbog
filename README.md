@@ -62,6 +62,13 @@ cp -r opencode-dazhdbog ~/.config/opencode/plugins/dazhdbog
 opencode service restart
 ```
 
+**Simplest (whole repo is the plugin folder):**
+
+```bash
+git clone --depth 1 https://github.com/Leylin007/opencode-dazhdbog.git ~/.config/opencode/plugins/dazhdbog
+opencode service restart
+```
+
 After the restart, open the sidebar — the Dazhdbog panel appears automatically.
 
 ## Reference projects (thanks!)

@@ -62,6 +62,13 @@ cp -r opencode-dazhdbog ~/.config/opencode/plugins/dazhdbog
 opencode service restart
 ```
 
+**Самый простой способ (весь репозиторий — это и есть папка плагина):**
+
+```bash
+git clone --depth 1 https://github.com/Leylin007/opencode-dazhdbog.git ~/.config/opencode/plugins/dazhdbog
+opencode service restart
+```
+
 После перезапуска откройте сайдбар — панель Даждьбога появится автоматически.
 
 ## Референсные проекты (благодарности!)
