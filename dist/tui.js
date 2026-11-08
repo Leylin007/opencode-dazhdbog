@@ -6287,9 +6287,8 @@ var tui_default = definePlugin({
       const custom = readItemGroupsCached("tools", projectRoot);
       const assignedGroup = new Map;
       for (const [gname, cfg] of Object.entries(custom)) {
-        if (cfg.enabled)
-          for (const item of cfg.items)
-            assignedGroup.set(item, gname);
+        for (const item of cfg.items)
+          assignedGroup.set(item, gname);
       }
       const mkEntry = (tool) => ({
         name: tool.name,
@@ -6333,6 +6332,9 @@ var tui_default = definePlugin({
       const result = [];
       const pushGroup = (label, entries, key, enabled = true) => {
         sortByWeight(entries);
+        if (!enabled)
+          for (const t of entries)
+            t.enabled = false;
         result.push({
           key,
           label,
@@ -6344,8 +6346,6 @@ var tui_default = definePlugin({
         });
       };
       for (const name of Object.keys(custom)) {
-        if (!custom[name].enabled)
-          continue;
         pushGroup(name, buckets.get(name) ?? [], `tools:custom:${name}`, custom[name].enabled);
       }
       if (system.length > 0)
@@ -6468,28 +6468,23 @@ var tui_default = definePlugin({
           for (const id of cfg.items)
             passign.set(id, gname);
       }
-      const flat = [...seen.values()].sort((a, b) => a.system === b.system ? a.label.localeCompare(b.label) : a.system ? -1 : 1).filter((plugin) => {
+      const flat = [...seen.values()].sort((a, b) => a.system === b.system ? a.label.localeCompare(b.label) : a.system ? -1 : 1).map((plugin) => {
         const g = passign.get(plugin.id);
-        if (g === undefined)
-          return true;
-        return pcustom[g]?.enabled !== false;
-      }).map((plugin) => {
-        const g = passign.get(plugin.id);
+        const groupDisabled = g !== undefined && pcustom[g]?.enabled === false;
         return {
           ...plugin,
-          groupLabel: g ?? "Other"
+          groupLabel: g ?? "Other",
+          enabled: groupDisabled ? false : plugin.enabled
         };
       });
       const pluginTokensEst = (plugin) => Math.max(1, Math.round(plugin.label.length / 4)) + plugin.tools.reduce((s, t) => s + t.tokens, 0);
       const placeholders = [];
       for (const name of Object.keys(pcustom)) {
-        if (!pcustom[name].enabled)
-          continue;
         placeholders.push({
           key: `plugin:custom:${name}`,
           id: `__group__${name}`,
           label: name,
-          enabled: true,
+          enabled: pcustom[name].enabled,
           system: false,
           tools: [],
           open: collapsedMap["plugins"] !== false && collapsedMap[`plugin:custom:${name}`] !== false,
@@ -6672,8 +6667,7 @@ var tui_default = definePlugin({
       const customNames = new Set(Object.keys(custom));
       const groupOrder = [];
       for (const name of Object.keys(custom)) {
-        if (custom[name].enabled)
-          groupOrder.push(name);
+        groupOrder.push(name);
       }
       for (const [label] of classified) {
         if (!customNames.has(label) && !groupOrder.includes(label) && label !== mcpDefaultClass)
@@ -6684,9 +6678,6 @@ var tui_default = definePlugin({
       const buckets = new Map;
       for (const server of servers) {
         const label = serverToGroup.get(server.name) ?? mcpDefaultClass;
-        const cfg = custom[label];
-        if (cfg && !cfg.enabled)
-          continue;
         const list = buckets.get(label);
         if (list)
           list.push(server);
