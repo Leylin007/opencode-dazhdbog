@@ -1,0 +1,59 @@
+{
+  "name": "opencode-dazhdbog",
+  "version": "2.0.0",
+  "description": "OpenCode TUI plugin: skills manager with sets, per-skill toggles and loaded-state sidebar",
+  "type": "module",
+  "license": "MIT",
+  "author": "aihaipeng",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/aihaipeng/opencode-skills-tui.git"
+  },
+  "bugs": {
+    "url": "https://github.com/aihaipeng/opencode-skills-tui/issues"
+  },
+  "homepage": "https://github.com/aihaipeng/opencode-skills-tui#readme",
+  "keywords": [
+    "opencode",
+    "opencode-plugin",
+    "tui",
+    "skills",
+    "sidebar"
+  ],
+  "files": [
+    "index.ts",
+    "tui.tsx",
+    "dist",
+    "README.md",
+    "README.zh-CN.md",
+    "LICENSE"
+  ],
+  "exports": {
+    ".": "./index.ts",
+    "./tui": "./dist/tui.js"
+  },
+  "scripts": {
+    "build": "bun run typecheck && bun scripts/build.ts",
+    "test": "bun test --conditions=browser --preload @opentui/solid/preload",
+    "test:package": "bun run build && bun scripts/test-package.ts",
+    "typecheck": "tsc --noEmit",
+    "prepack": "bun run build"
+  },
+  "dependencies": {
+    "jsonc-parser": "^3.3.1"
+  },
+  "peerDependencies": {
+    "@opentui/core": ">=0.5.10",
+    "@opentui/solid": ">=0.5.10",
+    "solid-js": ">=1.9.0"
+  },
+  "devDependencies": {
+    "@opencode/client": "^2.0.16",
+    "@opencode/plugin": "^2.0.16",
+    "@opencode/theme": "2.0.16",
+    "@opentui/core": "^0.6.6",
+    "@opentui/solid": "^0.6.6",
+    "solid-js": "^1.9.11",
+    "typescript": "^5.8.2"
+  }
+}
