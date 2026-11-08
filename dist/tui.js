@@ -1149,7 +1149,7 @@ function SkillsManagerPanel(props) {
             _$insert(_el$121, () => isOpen(group.key) ? "\u25BC" : "\u25B6");
             _$insertNode(_el$122, _el$123);
             _$setProp(_el$122, "flexShrink", 0);
-            _$setProp(_el$122, "onMouseUp", (event) => {
+            _$setProp(_el$123, "onMouseUp", (event) => {
               if (event.button !== 0)
                 return;
               stop(event);
@@ -1405,7 +1405,7 @@ function SkillsManagerPanel(props) {
                   var _el$146 = _$createElement("box"), _el$147 = _$createElement("text");
                   _$insertNode(_el$146, _el$147);
                   _$setProp(_el$146, "flexShrink", 0);
-                  _$setProp(_el$146, "onMouseUp", (event) => {
+                  _$setProp(_el$147, "onMouseUp", (event) => {
                     if (event.button !== 0)
                       return;
                     stop(event);
@@ -1669,7 +1669,7 @@ function SkillsManagerPanel(props) {
             _$insert(_el$172, () => isOpen(group.key) ? "\u25BC" : "\u25B6");
             _$insertNode(_el$173, _el$174);
             _$setProp(_el$173, "flexShrink", 0);
-            _$setProp(_el$173, "onMouseUp", (event) => {
+            _$setProp(_el$174, "onMouseUp", (event) => {
               if (event.button !== 0)
                 return;
               stop(event);
@@ -5277,8 +5277,23 @@ var tui_default = definePlugin({
     };
     const toggleItemGroup = async (kind, label) => {
       await mutateItemGroups(kind, (groups) => {
-        if (groups[label])
-          groups[label].enabled = !groups[label].enabled;
+        if (!groups[label]) {
+          let items = [];
+          try {
+            if (kind === "plugins") {
+              const built = buildPlugins(currentLocation(), collapseMap());
+              items = built.filter((p) => p.groupLabel === label).map((p) => p.id).filter((id) => !id.startsWith("__group__"));
+            } else {
+              const built = buildTools(currentLocation(), collapseMap());
+              items = built.filter((g) => g.label === label).flatMap((g) => g.tools.map((t) => t.name));
+            }
+          } catch {}
+          groups[label] = {
+            items,
+            enabled: true
+          };
+        }
+        groups[label].enabled = !groups[label].enabled;
       });
     };
     const renameItemGroup = async (kind, label) => {
@@ -6269,6 +6284,61 @@ var tui_default = definePlugin({
         reportError(`\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0438\u0442\u044C \xAB${skill.name ?? skill.id}\xBB: ${errorMessage(error)}`);
       }
     };
+    const unassignedStatePath = (projectRoot) => join9(projectRoot, ".opencode", ".skills-tui", "unassigned-state.json");
+    const toggleUnassignedAll = async (skills) => {
+      if (disposed)
+        return;
+      const root = currentLocation().directory;
+      const file = unassignedStatePath(root);
+      let prev = {};
+      try {
+        const raw = readTextFile(file);
+        if (raw)
+          prev = JSON.parse(raw);
+      } catch {}
+      const turnOff = prev.enabled !== false;
+      try {
+        if (turnOff) {
+          const saved = {};
+          const jobs = [];
+          for (const skill of skills) {
+            saved[skill.id] = skill.enabled;
+            if (skill.enabled) {
+              const target = targetForSkill(skill.path, root);
+              jobs.push(writeSkillPermissions(root, target, {
+                [skill.id]: "deny"
+              }));
+            }
+          }
+          await Promise.all(jobs);
+          await writeTextFileAtomic(file, `${JSON.stringify({
+            enabled: false,
+            saved
+          }, null, 2)}
+`);
+        } else {
+          const jobs = [];
+          for (const skill of skills) {
+            const wanted = prev.saved?.[skill.id];
+            if (wanted === undefined)
+              continue;
+            if (wanted !== skill.enabled) {
+              const target = targetForSkill(skill.path, root);
+              jobs.push(writeSkillPermissions(root, target, {
+                [skill.id]: wanted ? "allow" : "deny"
+              }));
+            }
+          }
+          await Promise.all(jobs);
+          await writeTextFileAtomic(file, `${JSON.stringify({}, null, 2)}
+`);
+        }
+        setOpError(undefined);
+        bumpTree();
+      } catch (error) {
+        reportError(`\u041D\u0435 \u0443\u0434\u0430\u043B\u043E\u0441\u044C \u043F\u0435\u0440\u0435\u043A\u043B\u044E\u0447\u0438\u0442\u044C \u0433\u0440\u0443\u043F\u043F\u0443 \xAB\u0411\u0435\u0437 \u043D\u0430\u0431\u043E\u0440\u0430\xBB: ${errorMessage(error)}`);
+      }
+    };
     const sanitizeMcpNamespace = (name) => name.replace(/[^a-zA-Z0-9_-]/g, "_");
     const buildTools = (location, collapsedMap = {}) => {
       treeRev();
@@ -6772,8 +6842,13 @@ var tui_default = definePlugin({
     const toggleMcpGroup = async (group) => {
       const label = group.label;
       await mutateMcpGroups((groups) => {
-        if (groups[label])
-          groups[label].enabled = !groups[label].enabled;
+        if (!groups[label]) {
+          groups[label] = {
+            servers: group.servers.map((s) => s.name),
+            enabled: true
+          };
+        }
+        groups[label].enabled = !groups[label].enabled;
       });
     };
     const renameMcpGroup = async (group) => {
