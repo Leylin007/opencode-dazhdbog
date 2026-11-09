@@ -6544,6 +6544,7 @@ var tui_default = definePlugin({
           label: candidate.id,
           enabled: !cli.disabledIDs.has(candidate.id),
           system: SYSTEM_PLUGINS.has(candidate.id),
+          local: true,
           tools: [],
           open: collapsedMap["plugins"] !== false && collapsedMap[`plugin:${candidate.id}`] !== false
         });
@@ -6624,7 +6625,11 @@ var tui_default = definePlugin({
       if (disposed || plugin.system)
         return;
       try {
-        await setPluginEnabled(plugin.id, !plugin.enabled);
+        if (plugin.local) {
+          await setPluginDirectiveOnly(plugin.id, !plugin.enabled);
+        } else {
+          await setPluginEnabled(plugin.id, !plugin.enabled);
+        }
         setOpError(undefined);
         bumpTree();
         ctx.ui.toast.show({
