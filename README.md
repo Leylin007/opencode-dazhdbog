@@ -71,6 +71,17 @@ opencode service restart
 
 After the restart, open the sidebar — the Dazhdbog panel appears automatically.
 
+## Performance on Windows (TUI lag)
+
+OpenCode v2's TUI has a known rendering regression in **Windows Terminal**: mouse-wheel scrolling and window resize can lag badly (upstream issue [#54239](https://github.com/anomalyco/opencode/issues/54239)), especially in long sessions.
+
+If the interface stutters:
+
+- Run OpenCode in **[WezTerm](https://wezfurlong.org/wezterm/)** (or Alacritty) instead of Windows Terminal — the same TUI renders smoothly there;
+- Keep sessions small: use `/new` for new tasks and `/clear` to trim long output — huge sessions slow down any terminal;
+- Disable heavy MCP servers you don't need (e.g. code indexers) via this plugin's MCP panel or config;
+- Move `TEMP`/`TMP` to a disk with free space if the system drive is nearly full.
+
 ## Reference projects (thanks!)
 
 This plugin was built with heavy inspiration from three great open-source OpenCode plugins — many thanks to their authors:
